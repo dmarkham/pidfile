@@ -20,7 +20,7 @@ func init() {
 // place your process in the crontab and leave it.
 // It tries to keep only 1 running at a time
 //
-func ExiIfRunning(file string) {
+func ExitIfRunning(file string) {
 
 	running, _ := IsPidfileRunning(file)
 	if running {

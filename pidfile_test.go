@@ -26,7 +26,7 @@ func TestPid(t *testing.T) {
   }
 
 
-  pidfile.ExiIfRunning(pidFile)
+  pidfile.ExitIfRunning(pidFile)
 	t.Fatal("Should not make it here")
 
 
