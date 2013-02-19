@@ -6,6 +6,7 @@ import (
 	"path"
 	"runtime"
 	"strconv"
+	//"syscall"
 )
 
 func init() {
@@ -14,23 +15,47 @@ func init() {
 	}
 }
 
+// This function will exit if the pidfile has a
+// running process already this is useful to just
+// place your process in the crontab and leave it.
+// It tries to keep only 1 running at a time
+//
+func ExiIfRunning(file string) {
+
+	running, _ := IsPidfileRunning(file)
+	if running {
+		os.Exit(0)
+	} else {
+
+		err := SetPidfile(file)
+		if err != nil {
+			fmt.Printf("Setting Pid Fialed: %v", err)
+			os.Exit(1)
+		}
+		val, _ := GetPidFileValue(file)
+
+		// I'm sure there are many race conditions this does not catch
+		if val != os.Getpid() {
+			fmt.Printf("Pid file value cheanged: %v != %v\n", val, os.Getpid())
+			os.Exit(1)
+		}
+	}
+}
 
 // checks to see if the pid in the file you passed in is still running
+// if the file doesnt exists it will return false
 func IsPidfileRunning(file string) (running bool, err error) {
-	f, err := os.Open(file)
+
+	pid, err := GetPidFileValue(file)
+	// some sort of error
 	if err != nil {
-		return false, fmt.Errorf("Can not Open (%s): %s", file, err)
+		return false, err
 	}
 
-	buf := make([]byte, 30)
-	read, err := f.Read(buf)
-	if err != nil {
-		return false, fmt.Errorf("Can not Read (%s): %s", file, err)
-	}
-
-	pid, err := strconv.ParseInt(string(buf[0:read]), 10, 64)
-	if err != nil {
-		return false, fmt.Errorf("Can not Parse (%s): %s", string(buf[0:read]), err)
+	// no value with no error just means the file didnt exist
+	// so it's not running
+	if pid == 0 {
+		return false, nil
 	}
 
 	_, err = os.Stat(path.Join("/proc", strconv.Itoa(int(pid))))
@@ -43,6 +68,32 @@ func IsPidfileRunning(file string) (running bool, err error) {
 	panic("Should not Reach")
 }
 
+func GetPidFileValue(file string) (pid int, err error) {
+
+	fstat, _ := os.Stat(file)
+	if fstat == nil {
+		return 0, nil
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return 0, fmt.Errorf("Can not Open (%s): %s", file, err)
+	}
+	// could it really ever be larger than this?
+	buf := make([]byte, 30)
+	read, err := f.Read(buf)
+	if err != nil {
+		return 0, fmt.Errorf("Can not Read (%s): %s", file, err)
+	}
+
+	bigPid, err := strconv.ParseInt(string(buf[0:read]), 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("Can not Parse (%s): %s", string(buf[0:read]), err)
+	}
+
+	return int(bigPid), nil
+}
+
 // Sets a pid file without checking anything
 // will over write a file if it exists
 func SetPidfile(file string) (err error) {
@@ -52,10 +103,16 @@ func SetPidfile(file string) (err error) {
 	if err != nil {
 		return fmt.Errorf("Can not create (%s): %s", file, err)
 	}
+
+	// pretty sure this is helping nothing.
+	// defer syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+	// syscall.Flock(int(f.Fd()), syscall.LOCK_EX)
+
 	_, err = f.WriteString(strconv.Itoa(pid))
 	if err != nil {
 		return fmt.Errorf("Can not write (%s): %s", file, err)
 	}
+
 	err = f.Close()
 	if err != nil {
 		return fmt.Errorf("Can not close (%s): %s", file, err)

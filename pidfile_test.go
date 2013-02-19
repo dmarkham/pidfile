@@ -2,7 +2,7 @@ package pidfile_test
 
 import (
 	"testing"
-  "github.com/dmarkham/pidfile"
+  "."
   "os"
   "path"
 )
@@ -26,6 +26,8 @@ func TestPid(t *testing.T) {
   }
 
 
+  pidfile.ExiIfRunning(pidFile)
+	t.Fatal("Should not make it here")
 
 
 
