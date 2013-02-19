@@ -9,13 +9,13 @@ import (
 )
 
 func init() {
-
 	if runtime.GOOS != "linux" {
 		panic("pidfile: Your OS doesnt work yet. Sry..")
 	}
-
 }
 
+
+// checks to see if the pid in the file you passed in is still running
 func IsPidfileRunning(file string) (running bool, err error) {
 	f, err := os.Open(file)
 	if err != nil {
@@ -62,5 +62,4 @@ func SetPidfile(file string) (err error) {
 	}
 
 	return nil
-
 }
