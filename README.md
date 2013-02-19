@@ -1,7 +1,7 @@
 pidfile
 ==========
 
-go get github.com/dmarkham/pidfile
+`go get github.com/dmarkham/pidfile`
 
 ```go
 // if another process is running with the pid contained
