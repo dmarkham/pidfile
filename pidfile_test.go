@@ -9,9 +9,8 @@ import (
 
 func TestPid(t *testing.T) {
 
-  
   pidFile := path.Join( os.TempDir() , "foo.pid")
-  err := pidfile.SetPidfile(pidFile) 
+  err := pidfile.SetPidfile(pidFile)
   if(err != nil){
 		t.Fatal("setting pid filed, actual", err)
   }

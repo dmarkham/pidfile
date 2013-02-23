@@ -6,14 +6,8 @@ import (
 	"path"
 	"runtime"
 	"strconv"
-	//"syscall"
 )
 
-func init() {
-	if runtime.GOOS != "linux" {
-		panic("pidfile: Your OS doesnt work yet. Sry..")
-	}
-}
 
 // This function will exit if the pidfile has a
 // running process already this is useful to just
@@ -58,6 +52,10 @@ func IsPidfileRunning(file string) (running bool, err error) {
 		return false, nil
 	}
 
+	// this only works with link currently
+  if runtime.GOOS != "linux" {
+		panic("pidfile: Your OS doesnt work yet. Sry..")
+	}
 	_, err = os.Stat(path.Join("/proc", strconv.Itoa(int(pid))))
 	if err != nil {
 		return false, nil
@@ -103,10 +101,6 @@ func SetPidfile(file string) (err error) {
 	if err != nil {
 		return fmt.Errorf("Can not create (%s): %s", file, err)
 	}
-
-	// pretty sure this is helping nothing.
-	// defer syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
-	// syscall.Flock(int(f.Fd()), syscall.LOCK_EX)
 
 	_, err = f.WriteString(strconv.Itoa(pid))
 	if err != nil {
