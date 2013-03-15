@@ -1,6 +1,13 @@
 pidfile
 ==========
 
+[![Build Status][1]][2]
+
+[1]: https://secure.travis-ci.org/dmarkham/pidfile.png
+[2]: http://www.travis-ci.org/dmarkham/pidfile
+
+
+
 `go get github.com/dmarkham/pidfile`
 
 ```go
