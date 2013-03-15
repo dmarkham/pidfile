@@ -8,7 +8,6 @@ import (
 	"strconv"
 )
 
-
 // This function will exit if the pidfile has a
 // running process already this is useful to just
 // place your process in the crontab and leave it.
@@ -53,7 +52,7 @@ func IsPidfileRunning(file string) (running bool, err error) {
 	}
 
 	// this only works with link currently
-  if runtime.GOOS != "linux" {
+	if runtime.GOOS != "linux" {
 		panic("pidfile: Your OS doesnt work yet. Sry..")
 	}
 	_, err = os.Stat(path.Join("/proc", strconv.Itoa(int(pid))))
